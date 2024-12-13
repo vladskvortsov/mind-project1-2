@@ -71,6 +71,7 @@ jobs:
           working_directory: ./backend_redis/
 
   update-images-on-server:
+    continue-on-error: true
     runs-on: ubuntu-latest
     needs:
     - deploy-rds-backend-to-ecr
