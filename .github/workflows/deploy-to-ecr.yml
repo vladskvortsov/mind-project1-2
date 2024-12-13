@@ -101,14 +101,14 @@ jobs:
         fi
 
         echo "Instance ID for $INSTANCE_NAME: $INSTANCE_ID"
-        echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+        echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
 
     - name: Run SSH Command
       id: ssh-command
       uses: leonowski/ec2-ssh-ghactions@v1
       with:
         username: ubuntu
-        ec2_instance_id: $INSTANCE_ID
+        ec2_instance_id: ${{ steps.get-instance-id.outputs.instance_id }}
         region: ${{ secrets.AWS_REGION }}
         command: |
           sudo docker-compose down
