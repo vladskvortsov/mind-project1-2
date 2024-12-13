@@ -48,7 +48,7 @@ jobs:
          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
          aws_default_region: ${{ secrets.AWS_REGION }}
          aws_ecr_repo_name: project1-2-backend
-         image_tag: backend-rds
+         image_tag: backend-rds:latest
          working_directory: ./backend_rds/
 
 
@@ -67,5 +67,54 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_default_region: ${{ secrets.AWS_REGION }}
           aws_ecr_repo_name: project1-2-backend
-          image_tag: backend-redis
+          image_tag: backend-redis:latest
           working_directory: ./backend_redis/
+
+  update-images-on-server:
+    runs-on: ubuntu-latest
+    needs:
+    - deploy-rds-backend-to-ecr
+    - deploy-redis-backend-to-ecr
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        # role-to-assume: ${{ secrets.YOUR_ROLE_ARN }}
+
+    - name: Fetch EC2 Instance ID
+      id: get-instance-id
+      run: |
+        INSTANCE_NAME="project1-2-backend"
+        INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
+                    "Name=instance-state-name,Values=running" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+
+        if [ -z "$INSTANCE_ID" ]; then
+          echo "Error: No running instance found with name $INSTANCE_NAME"
+          exit 1
+        fi
+
+        echo "Instance ID for $INSTANCE_NAME: $INSTANCE_ID"
+        echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
+    - name: Run SSH Command
+      id: ssh-command
+      uses: leonowski/ec2-ssh-ghactions@v1
+      with:
+        username: ubuntu
+        ec2_instance_id: $INSTANCE_ID
+        region: ${{ secrets.AWS_REGION }}
+        command: |
+          sudo docker-compose down
+          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-backend:backend-rds
+          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-backend:backend-redis
+          sudo docker-compose up -d
+
+    - name: Output
+      run: |
+        echo -e "${{ steps.ssh-command.outputs.command_output }}"
