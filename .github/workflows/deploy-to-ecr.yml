@@ -48,7 +48,7 @@ jobs:
          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
          aws_default_region: ${{ secrets.AWS_REGION }}
          aws_ecr_repo_name: project1-2-backend
-         image_tag: backend-rds:latest
+         image_tag: backend-rds
          working_directory: ./backend_rds/
 
 
@@ -67,7 +67,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_default_region: ${{ secrets.AWS_REGION }}
           aws_ecr_repo_name: project1-2-backend
-          image_tag: backend-redis:latest
+          image_tag: backend-redis
           working_directory: ./backend_redis/
 
   update-images-on-server:
