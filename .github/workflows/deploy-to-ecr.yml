@@ -75,6 +75,8 @@ jobs:
          aws_default_region: ${{ secrets.AWS_REGION }}
          aws_ecr_repo_name: project1-2-rds-backend
         #  image_tag: latest
+         use_sha: 'true' # won't do anything since image_tag is set
+
          working_directory: ./backend_rds/
 
 
@@ -94,6 +96,8 @@ jobs:
           aws_default_region: ${{ secrets.AWS_REGION }}
           aws_ecr_repo_name: project1-2-redis-backend
           # image_tag: latest
+          use_sha: 'true' # won't do anything since image_tag is set
+
           working_directory: ./backend_redis/
 
   update-images-on-server:
