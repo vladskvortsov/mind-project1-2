@@ -74,7 +74,7 @@ jobs:
          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
          aws_default_region: ${{ secrets.AWS_REGION }}
          aws_ecr_repo_name: project1-2-rds-backend
-        #  image_tag: latest-${{ github.sha}}
+         image_tag: latest ${{ github.sha}}
          use_sha: 'true' # won't do anything since image_tag is set
 
          working_directory: ./backend_rds/
@@ -95,7 +95,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_default_region: ${{ secrets.AWS_REGION }}
           aws_ecr_repo_name: project1-2-redis-backend
-          # image_tag: latest-${{ github.sha}}
+          image_tag: latest ${{ github.sha}}
           use_sha: 'true' # won't do anything since image_tag is set
 
           working_directory: ./backend_redis/
@@ -143,8 +143,8 @@ jobs:
         command: |
           cd /home/ubuntu
           sudo docker-compose down
-          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-rds-backend:${{ github.sha }}
-          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-redis-backend:${{ github.sha }}
+          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-rds-backend:latest
+          sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/project1-2-redis-backend:latest
           sudo docker-compose up -d
 
     - name: Output
