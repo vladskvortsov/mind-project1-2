@@ -85,7 +85,7 @@ jobs:
          #  use_sha: 'true' # won't do anything since image_tag is set
           working_directory: ./backend_rds/
 
-      - name: Get Image Manifest for Existing Tag
+      - name: Get Image Manifest and Create Additional Tag
         id: get-manifest
         run: |
            IMAGE_MANIFEST=$(aws ecr batch-get-image \
@@ -93,14 +93,11 @@ jobs:
              --image-ids imageTag=latest \
              --query 'images[0].imageManifest' \
              --output text)
-           echo "image_manifest=$IMAGE_MANIFEST" >> $GITHUB_OUTPUT
 
-      - name: Create Additional Tag
-        run: |
            aws ecr put-image \
              --repository-name project1-2-rds-backend \
              --image-tag ${{ github.sha }} \
-             --image-manifest "${{ steps.get-manifest.outputs.image_manifest }}"
+             --image-manifest "$IMAGE_MANIFEST"
 
 
   deploy-redis-backend-to-ecr:
@@ -129,7 +126,7 @@ jobs:
           # use_sha: 'true' # won't do anything since image_tag is set
           working_directory: ./backend_redis/
 
-      - name: Get Image Manifest for Existing Tag
+      - name: Get Image Manifest and Create Additional Tag
         id: get-manifest
         run: |
            IMAGE_MANIFEST=$(aws ecr batch-get-image \
@@ -137,14 +134,11 @@ jobs:
              --image-ids imageTag=latest \
              --query 'images[0].imageManifest' \
              --output text)
-           echo "image_manifest=$IMAGE_MANIFEST" >> $GITHUB_OUTPUT
 
-      - name: Create Additional Tag
-        run: |
            aws ecr put-image \
              --repository-name project1-2-redis-backend \
              --image-tag ${{ github.sha }} \
-             --image-manifest "${{ steps.get-manifest.outputs.image_manifest }}"
+             --image-manifest "$IMAGE_MANIFEST"
 
   update-images-on-server:
     continue-on-error: true
